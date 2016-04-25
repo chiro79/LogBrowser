@@ -6,10 +6,10 @@
 	<apps>
 		<appConfig name="LOCAL">
 			<logs>
-				<logConfig type="LOCAL" basedir="c:/devel/testdata/">
+				<logConfig type="LOCAL" basedir="./testdata/">
 					<file>test.log</file>
 				</logConfig>
-				<logConfig type="LOCAL" basedir="c:/devel/testdata/" canBeCompressed="GZ">
+				<logConfig type="LOCAL" basedir="./testdata/" canBeCompressed="GZ">
 					<file>apache_logs/error.log{date}</file>
 				</logConfig>
 			</logs>

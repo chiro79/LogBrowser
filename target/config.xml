@@ -6,36 +6,29 @@
 	<apps>
 		<appConfig name="LOCAL">
 			<logs>
-				<logConfig type="LOCAL" basedir="c:/devel/testdata/">
-					<file>server{date}</file>
-					<file>other.log</file>
+				<logConfig type="LOCAL" basedir="./testdata/">
+					<file>test.log</file>
+				</logConfig>
+				<logConfig type="LOCAL" basedir="./testdata/" canBeCompressed="GZ">
+					<file>apache_logs/error.log{date}</file>
 				</logConfig>
 			</logs>
 		</appConfig>
 
 		<appConfig name="PROD">
 			<logs>
-				<logConfig type="HTTP" host="prod-logs-portal.com" alias="server001"
-					user="guest" pwd="none" basedir="/prod/aux" canBeCompressed="GZ">
-					<file>/logs/app/operation.log</file>
-					<file>/logs/app/statistics.log</file>
-					<file>/logs/app/operation{date}</file>
-					<file>/logs/app/statistics{date}</file>
-				</logConfig>
-
-				<logConfig type="HTTP" host="prod-logs-portal.com" alias="server002"
-					user="guest" pwd="none" basedir="/prod/aux" canBeCompressed="GZ">
-					<file>/jboss/logs/server.log{date}</file>
-					<file>/oldlogs/app/operation{date}</file>
+				<logConfig type="HTTP" host="https://github.com/agustin-miquel/LogBrowser" alias="github"
+					user="agustinmiquel@yahoo.es" pwd="Github123" basedir="/blob/master/" canBeCompressed="GZ">
+					<file>pom.xml</file>
+					<file>config.xml</file>
 				</logConfig>
 			</logs>
 		</appConfig>
 
 		<appConfig name="DEV">
 			<logs>
-				<logConfig type="SSH" host="dev-logs" user="user" pwd="pwd">
-					<file>/jboss/standalone/log/server.log</file>
-					<file>/jboss/statistis.log</file>
+				<logConfig type="SSH" host="ftp.cesca.es" user="anonymous" pwd="">
+					<file>/centos/2.1/readme.txt</file>
 				</logConfig>
 			</logs>
 		</appConfig>

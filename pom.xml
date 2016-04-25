@@ -35,8 +35,11 @@
 							<tasks>
 								<echo>Copy configuration file to target</echo>
 								<copy file="config.xml" tofile="${basedir}/target/config.xml" />
+
 								<echo>Copy test files to target</echo>
-								<copy folder="testdata" tofile="${basedir}/target/testdata" />
+								<copy todir="${basedir}/target/testdata">
+									<fileset dir="testdata"/>
+								</copy>
 							</tasks>
 						</configuration>
 					</execution>
