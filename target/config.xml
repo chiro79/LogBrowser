@@ -9,8 +9,8 @@
 				<logConfig type="LOCAL" basedir="./testdata/">
 					<file>test.log</file>
 				</logConfig>
-				<logConfig type="LOCAL" basedir="./testdata/" canBeCompressed="GZ">
-					<file>apache_logs/error.log{date}</file>
+				<logConfig type="LOCAL" alias="apache" basedir="./testdata/apache_logs/" canBeCompressed="GZ">
+					<file>error.log{date}</file>
 				</logConfig>
 			</logs>
 		</appConfig>
@@ -18,7 +18,7 @@
 		<appConfig name="PROD">
 			<logs>
 				<logConfig type="HTTP" host="https://github.com/agustin-miquel/LogBrowser" alias="github"
-					user="agustinmiquel@yahoo.es" pwd="Github123" basedir="/blob/master/" canBeCompressed="GZ">
+					user="" pwd="" basedir="/blob/master/">
 					<file>pom.xml</file>
 					<file>config.xml</file>
 				</logConfig>
