@@ -43,21 +43,19 @@ class ResultsTable extends JTable implements ContentTable {
 	 */
 	void setResults(List<InfoLine> infoLines) {
 		this.infoLines = infoLines;
-		resultsModel.setLines(infoLines);
-		this.fireTableDataChanged();
 
 		// Calculate the max width and height of the JTable according to the results:
-		int maxLineWidth = resultsModel.setLines(infoLines);
+		int maxLineWidth = resultsModel.setResults(infoLines);
 		int height = this.getRowHeight() * infoLines.size();
 		
 		// Resize the table:
 		this.getParent().setPreferredSize(new Dimension(maxLineWidth, height));
 		this.getColumnModel().getColumn(0).setPreferredWidth(maxLineWidth);
+		this.fireTableDataChanged();
 	}
     
     /**
      * Return the LogFile of the selected row
-     * (will be null if it is a message line)
      */
     LogFile getLogFile(int rowIndex) {
     	return infoLines.get(rowIndex).getFile();
@@ -119,7 +117,9 @@ class ResultsTableModel extends AbstractTableModel {
 	 * @param lines
 	 * @return
 	 */
-	int setLines(List<InfoLine> results) {
+	int setResults(List<InfoLine> results) {
+		
+		this.results.clear();
 
 		int maxLineWidth = 0;
 		for (InfoLine line : results) {
@@ -128,7 +128,10 @@ class ResultsTableModel extends AbstractTableModel {
 				text = "<span style=\"color:blue\">" + line.getFile() + "</span>";
 			} 
 			else if (line.getType() == InfoLine.Type.LINE){
-				text = "<span style=\"color:red;\">" + String.format("%05d", line.getLine().getLineNumber()) + "</span> " + 
+				// Line number is 0 based:
+				int lineNumber = line.getLine().getLineNumber() + 1;
+				
+				text = "<span style=\"color:red;\">" + String.format("%05d", lineNumber) + "</span> " + 
 			    "<code>" + StringEscapeUtils.escapeHtml(line.getLine().getText()) + "</code>";
 			}
 

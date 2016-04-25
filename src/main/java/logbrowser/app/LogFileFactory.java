@@ -137,14 +137,18 @@ class LogFileFactory {
 		// Build the Reading Strategy:
 		switch(type) {
 		case HTTP:
-			URL url = new URL("HTTP://" + host + basedir + path);
+			String access = host.toLowerCase().startsWith("http") ? "" : "HTTP://";
+			URL url = new URL(access + host + basedir + path);
 			readFile = new ReadFileHttp(url, compressed, user, pwd);
 			break;
 		case SSH:
+			if (compressed != null) {
+				throw new LogBrowserException("SSH compressed files are not implemented");
+			}
 			readFile = new ReadFileSsh(host, user, pwd, (basedir == null ? path : basedir + path));
 			break;
 		case LOCAL:
-			readFile = new ReadFileLocal(basedir + path);
+			readFile = new ReadFileLocal(basedir + path, compressed);
 			break;
 		default:
 			throw new LogBrowserException("Invalid type: " + type);

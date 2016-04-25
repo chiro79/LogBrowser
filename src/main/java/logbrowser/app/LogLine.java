@@ -53,4 +53,9 @@ package logbrowser.app;
 			return false;
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return text;
+	}
 }

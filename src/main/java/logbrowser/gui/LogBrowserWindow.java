@@ -267,6 +267,9 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 			List<InfoLine> infoLines = logBrowser.search(appName, fromDate, toDate, text);
 			resultsTable.setResults(infoLines);
 			
+			// Select the search tab:
+			tabsPanel.setSelectedIndex(0);
+			
 			long duration = (System.currentTimeMillis() - t1) / 1000;
 			if (!text.isEmpty()) {
 				// Hightlight results (only if a text was searched):

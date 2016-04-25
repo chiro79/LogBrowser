@@ -20,7 +20,7 @@
 				</configuration>
 			</plugin>
 			
-			<!-- Copy configuration file to target -->
+			<!-- Copy configuration and test files to target -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -35,6 +35,8 @@
 							<tasks>
 								<echo>Copy configuration file to target</echo>
 								<copy file="config.xml" tofile="${basedir}/target/config.xml" />
+								<echo>Copy test files to target</echo>
+								<copy folder="testdata" tofile="${basedir}/target/testdata" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -57,7 +59,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- Copy project dependencies, copy config.xml -->
+			<!-- Copy project dependencies -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
