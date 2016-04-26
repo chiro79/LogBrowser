@@ -10,10 +10,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  * This is the configuration main element.
  * It will usually correspond to a group of files in a server that share similar characteristics.
  * Example:
- * 		type="HTTP", "SSH", "LOCAL"
- * 		host="myhost.com", "serverX" (or nothing for LOCAL configurations)
- * 		user="myuser" 
- * 		pwd="mypwd"  
+ * 		type="HTTP"
+ * 		host="myhost.com"
+ * 		user="user" 
+ * 		pwd="pwd"  
  *		basedir="/common/logs/" 
  *		canBeCompressed="GZ"
  * 
@@ -26,7 +26,7 @@ public class LogConfig {
 	/**
 	 * The implemented types of access.
 	 */
-	public enum Type {HTTP, SSH, LOCAL};
+	public enum Type {HTTP, HTTPS, SSH, LOCAL};
 	
 	/**
 	 * The implemented types of compression.

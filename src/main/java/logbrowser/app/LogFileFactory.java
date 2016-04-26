@@ -34,11 +34,9 @@ class LogFileFactory {
 	public static final String PATH_SEPARATOR = "/";
 
 	private String dateFormat;
-	private String dateSeparator;
 
-	LogFileFactory(String dateFormat, String dateSeparator) {
+	LogFileFactory(String dateFormat) {
 		this.dateFormat = dateFormat;
-		this.dateSeparator = dateSeparator;
 	};
 	
 	/**
@@ -91,7 +89,7 @@ class LogFileFactory {
 					
 					// Build the name of the LogFile with the date:
 					String dateString = new SimpleDateFormat(dateFormat).format(date);
-					path = path.replaceAll(DATE_HOLDER_EXPR, dateSeparator + dateString);
+					path = path.replaceAll(DATE_HOLDER_EXPR, dateString);
 				}
 				
 				// Prepare the strategy:
@@ -139,6 +137,11 @@ class LogFileFactory {
 		case HTTP:
 			String access = host.toLowerCase().startsWith("http") ? "" : "HTTP://";
 			URL url = new URL(access + host + basedir + path);
+			readFile = new ReadFileHttp(url, compressed, user, pwd);
+			break;
+		case HTTPS:
+			access = host.toLowerCase().startsWith("https") ? "" : "HTTPS://";
+			url = new URL(access + host + basedir + path);
 			readFile = new ReadFileHttp(url, compressed, user, pwd);
 			break;
 		case SSH:

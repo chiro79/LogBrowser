@@ -44,13 +44,14 @@ class ResultsTable extends JTable implements ContentTable {
 	void setResults(List<InfoLine> infoLines) {
 		this.infoLines = infoLines;
 
-		// Calculate the max width and height of the JTable according to the results:
-		int maxLineWidth = resultsModel.setResults(infoLines);
-		int height = this.getRowHeight() * infoLines.size();
+		// Set the content in the model, calculate max width (adding 20% extra space):
+		int maxLineWidth = (int)(resultsModel.setResults(infoLines) * 1.2);
 		
 		// Resize the table:
+		int height = this.getRowHeight() * infoLines.size();
 		this.getParent().setPreferredSize(new Dimension(maxLineWidth, height));
 		this.getColumnModel().getColumn(0).setPreferredWidth(maxLineWidth);
+		
 		this.fireTableDataChanged();
 	}
     

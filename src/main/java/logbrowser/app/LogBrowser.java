@@ -74,7 +74,7 @@ public class LogBrowser {
 			appNames.add(appConfig.getName());
 		}
 		
-		logFileFactory = new LogFileFactory(config.getDateFormat(), config.getDateSeparator());
+		logFileFactory = new LogFileFactory(config.getDateFormat());
 		logFiles = new ArrayList<>();
 	}
 	

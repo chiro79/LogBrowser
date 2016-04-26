@@ -1,34 +1,40 @@
 <config>
 	<dateFormat>yyyy-MM-dd</dateFormat>
-	<dateSeparator>.</dateSeparator>
 	<downloadBaseFolder>c:/devel/logs/</downloadBaseFolder>
 	<downloadExtension>.log</downloadExtension>
 	<apps>
-		<appConfig name="LOCAL">
+		<appConfig name="LOCAL example">
 			<logs>
-				<logConfig type="LOCAL" basedir="./testdata/">
+				<logConfig type="LOCAL" basedir="c:/devel/testdata/">
 					<file>test.log</file>
 				</logConfig>
 				<logConfig type="LOCAL" alias="apache" basedir="./testdata/apache_logs/" canBeCompressed="GZ">
-					<file>error.log{date}</file>
+					<file>error.log.{date}</file>
 				</logConfig>
 			</logs>
 		</appConfig>
 
-		<appConfig name="PROD">
+		<appConfig name="HTTPS example">
 			<logs>
-				<logConfig type="HTTP" host="https://github.com/agustin-miquel/LogBrowser" alias="github"
-					user="" pwd="" basedir="/blob/master/">
+				<logConfig type="HTTPS" host="github.com/agustin-miquel/LogBrowser" alias="github" basedir="/blob/master/">
 					<file>pom.xml</file>
 					<file>config.xml</file>
 				</logConfig>
 			</logs>
 		</appConfig>
 
-		<appConfig name="DEV">
+		<appConfig name="HTTP example">
 			<logs>
-				<logConfig type="SSH" host="ftp.cesca.es" user="anonymous" pwd="">
-					<file>/centos/2.1/readme.txt</file>
+				<logConfig type="HTTP" host="gnusha.org" basedir="/logs">
+					<file>/{date}.log</file>
+				</logConfig>
+			</logs>
+		</appConfig>
+
+		<appConfig name="SSH example">
+			<logs>
+				<logConfig type="SSH" host="test.rebex.net" user="demo" pwd="password">
+					<file>/readme.txt</file>
 				</logConfig>
 			</logs>
 		</appConfig>

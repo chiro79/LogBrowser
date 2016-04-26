@@ -52,7 +52,8 @@ class FileTable extends JTable implements ContentTable {
 	 * @throws IOException
 	 */
 	int setContent(List<LogLine> content) throws IOException {
-		maxLineWidth = fileModel.setLines(content);
+		// Set the content in the model, calculate max width (adding 20% extra space):
+		maxLineWidth = (int)(fileModel.setLines(content) * 1.2);
 		
 		// Resize the table:
 		int height = this.getRowHeight() * fileModel.getRowCount();
@@ -122,10 +123,12 @@ class FileTableModel extends AbstractTableModel {
 
 		int maxLineWidth = 0;
 		for (LogLine logLine : logLines) {
-			int size = frame.metrics.stringWidth(logLine.getText());
+			String text = "<code>" + StringEscapeUtils.escapeHtml(logLine.getText()) + "</code>";
+			
+			int size = frame.metrics.stringWidth(text);
 			maxLineWidth = Math.max(size, maxLineWidth);
 
-			this.lines.add("<code>" + StringEscapeUtils.escapeHtml(logLine.getText()) + "</code>");
+			this.lines.add(text);
 		}
 		return maxLineWidth;
 	}

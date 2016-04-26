@@ -30,6 +30,9 @@ Funcionalidad:
 4. SEARCH FILE: busca un texto en el fichero abierto.
 	Los botones 'anterior' (<) y 'siguiente' (>) permiten desplazarse entre los resultados encontrados en el fichero abierto.
 
+BUSQUEDA:
+la fecha de hoy se sustituye o no.
+
 Configuracion:
 **************
 1.Parametros generales:

@@ -83,7 +83,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 	FontMetrics metrics;
 	
 	private LogBrowser logBrowser;
-	
+    
 	public static void main(String[] args) {
 		// Schedule for the event-dispatching thread:
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {

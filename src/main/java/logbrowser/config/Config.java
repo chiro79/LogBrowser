@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Config {
 
 	private String dateFormat;
-	private String dateSeparator;
 	private String downloadBaseFolder;
 	private String downloadExtension;
 	private List<AppConfig> apps;
@@ -29,15 +28,6 @@ public class Config {
 	@XmlElement(name="dateFormat")
 	public void setDateFormat(String dateFormat) {
 		this.dateFormat = dateFormat;
-	}
-	
-	public String getDateSeparator() {
-		return dateSeparator;
-	}
-
-	@XmlElement(name="dateSeparator")
-	public void setDateSeparator(String dateSeparator) {
-		this.dateSeparator = dateSeparator;
 	}
 
 	public String getDownloadBaseFolder() {
