@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Example:
  * 		type="HTTP"
  * 		host="myhost.com"
+ * 		alias="apache"
  * 		user="user" 
  * 		pwd="pwd"  
  *		basedir="/common/logs/" 
