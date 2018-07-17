@@ -18,6 +18,8 @@ import logbrowser.app.fileread.ReadFileHttp;
 import logbrowser.app.fileread.ReadFileLocal;
 import logbrowser.app.fileread.ReadFileSsh;
 import logbrowser.config.LogConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory in charge of building LogFile objects.
@@ -28,6 +30,7 @@ import logbrowser.config.LogConfig;
  * @since 1.0
  */
 class LogFileFactory {
+	Logger logger = LoggerFactory.getLogger(LogFileFactory.class);
 
 	public static final String DATE_HOLDER = "{date}";
 	public static final String DATE_HOLDER_EXPR = "\\{date\\}";
@@ -55,8 +58,6 @@ class LogFileFactory {
 	    Calendar calendar = new GregorianCalendar();
 		List<LogFile> logFiles = new ArrayList<>();
 		
-		Date today = new Date();
-
 		// Common parameters for all files in this LogConfig:
 		LogConfig.Type type = logConfig.getType();
 		String host = logConfig.getHost();
@@ -68,57 +69,59 @@ class LogFileFactory {
 
 		// For each logfile definition in the configuration...
 		for (String file : logConfig.getFiles()) {
-		
-			// For each date selected...
-		    calendar.setTime(fromDate);
-		    while (!calendar.getTime().after(toDate))  {
-				Date date = calendar.getTime();
-				String path = file;
 
-				// if searching for today's files:
-				if (DateUtils.isSameDay(date, today)) {
-					path = path.replaceAll(DATE_HOLDER_EXPR, "");
+			// First, discard files without dateholder when searching for files from a certain date:
+			if (!file.contains(DATE_HOLDER)) {
+				ReadFile readFile = buildStrategy(type, host, user, pwd, basedir, file, null);
+				if (readFile.exists()) {
+					String name = file.contains(PATH_SEPARATOR) ? file.substring(file.lastIndexOf(PATH_SEPARATOR) + 1) : file;
+					logFiles.add(new LogFile(name, alias, readFile));
 				}
-				// if searching for old files:
-				else {
+			} else {
+				// For each date selected...
+				calendar.setTime(fromDate);
+				while (!calendar.getTime().after(toDate))  {
+					Date date = calendar.getTime();
+					String path = file;
+
 					// First, discard files without dateholder when searching for files from a certain date:
 					if (!path.contains(DATE_HOLDER)) {
-				        calendar.add(Calendar.DATE, 1);
+						calendar.add(Calendar.DATE, 1);
 						continue;
 					}
-					
+
 					// Build the name of the LogFile with the date:
 					String dateString = new SimpleDateFormat(dateFormat).format(date);
 					path = path.replaceAll(DATE_HOLDER_EXPR, dateString);
-				}
-				
-				// Prepare the strategy:
-				ReadFile readFile = null;
 
-				// 1. First try the compressed version of the file:
-				if (canBeCompressed != null) {
-					
-					readFile = buildStrategy(type, host, user, pwd, basedir, path, canBeCompressed);
-					if (readFile.exists()) {
-						String name = path.contains(PATH_SEPARATOR) ? path.substring(path.lastIndexOf(PATH_SEPARATOR) + 1) : path;
-						logFiles.add(new LogFile(name, alias, readFile));
-					} else {
-						readFile = null;
+					// Prepare the strategy:
+					ReadFile readFile = null;
+
+					// 1. First try the compressed version of the file:
+					if (canBeCompressed != null) {
+
+						readFile = buildStrategy(type, host, user, pwd, basedir, path, canBeCompressed);
+						if (readFile.exists()) {
+							String name = path.contains(PATH_SEPARATOR) ? path.substring(path.lastIndexOf(PATH_SEPARATOR) + 1) : path;
+							logFiles.add(new LogFile(name, alias, readFile));
+						} else {
+							readFile = null;
+						}
 					}
+
+					// 2. Normal version of the file:
+					if (readFile == null) {
+
+						readFile = buildStrategy(type, host, user, pwd, basedir, path, null);
+						if (readFile.exists()) {
+							String name = path.contains(PATH_SEPARATOR) ? path.substring(path.lastIndexOf(PATH_SEPARATOR) + 1) : path;
+							logFiles.add(new LogFile(name, alias, readFile));
+						}
+					}
+
+					calendar.add(Calendar.DATE, 1);
 				}
-				
-				// 2. Normal version of the file:
-				if (readFile == null) {
-					
-					readFile = buildStrategy(type, host, user, pwd, basedir, path, null);
-					if (readFile.exists()) {
-						String name = path.contains(PATH_SEPARATOR) ? path.substring(path.lastIndexOf(PATH_SEPARATOR) + 1) : path;
-						logFiles.add(new LogFile(name, alias, readFile));
-					}
-				}		
-				
-		        calendar.add(Calendar.DATE, 1);
-		    }
+			}
 		}
 		
 		return logFiles;

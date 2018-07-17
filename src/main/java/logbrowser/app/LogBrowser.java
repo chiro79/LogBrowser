@@ -21,6 +21,8 @@ import com.jcraft.jsch.JSchException;
 import logbrowser.config.AppConfig;
 import logbrowser.config.Config;
 import logbrowser.config.LogConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main class: access to the functions of the application.
@@ -29,6 +31,7 @@ import logbrowser.config.LogConfig;
  * @since 1.0
  */
 public class LogBrowser {
+	Logger logger = LoggerFactory.getLogger(LogBrowser.class);
 
 	// The location of the configuration file:
 	public static final String CONFIG_FILE = "./config.xml";  
@@ -62,6 +65,8 @@ public class LogBrowser {
 		if (config.getApps().size() == 0) {
 			throw new LogBrowserException("No applications found in the configuration.");
 		}
+
+		logger.debug("Loaded {} apps", config.getApps().size());
 		
 		this.downloadBaseFolder = config.getDownloadBaseFolder();
 		this.downloadExtension = config.getDownloadExtension();
@@ -72,6 +77,7 @@ public class LogBrowser {
 		for (AppConfig appConfig : config.getApps()) {
 			apps.put(appConfig.getName(), appConfig);
 			appNames.add(appConfig.getName());
+            logger.debug("\tapp '{}' with {} logs", appConfig.getName(), appConfig.getLogs().size());
 		}
 		
 		logFileFactory = new LogFileFactory(config.getDateFormat());
@@ -85,7 +91,7 @@ public class LogBrowser {
 	public List<String> getAppNames() {
 		return appNames;
 	}
-	
+
 	/**
 	 * Search.
 	 * @param appName
@@ -126,6 +132,7 @@ public class LogBrowser {
 			// ...every Log File:
 			for (LogFile logFile : logFileFactory.build(fromDate, toDate, logConfig)) {
 				logFiles.add(logFile);
+				logger.info("Searching on file {}", logFile.getName());
 
 				// If no text searched:
 				if (text == null || text.trim().length() == 0) {

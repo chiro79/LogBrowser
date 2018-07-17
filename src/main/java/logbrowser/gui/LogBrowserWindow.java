@@ -16,19 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
@@ -48,6 +38,8 @@ import logbrowser.app.LogFile;
 import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
 import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
 import net.sourceforge.jdatepicker.impl.UtilDateModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main component of the Swing GUI.
@@ -58,16 +50,18 @@ import net.sourceforge.jdatepicker.impl.UtilDateModel;
 public class LogBrowserWindow extends JFrame implements ActionListener, ChangeListener, MouseListener {
 	private static final long serialVersionUID = 1L;
 
-	public static final double SCREEN_SIZE_RATIO = 4.0 / 5.0;
-	public static final int MESSAGES_HEIGHT = 64;
-	public static final int SCROLL_INCREMENT = 16;
+	Logger logger = LoggerFactory.getLogger(LogBrowserWindow.class);
+
+	private static final double SCREEN_SIZE_RATIO = 4.0 / 5.0;
+	private static final int MESSAGES_HEIGHT = 64;
+	private static final int SCROLL_INCREMENT = 16;
 
 	// Action events:
-	public static final String PREV = "prev";
-	public static final String NEXT = "next";
-	public static final String SEARCH = "search";
-	public static final String DOWNLOAD = "download";
-	public static final String SEARCH_FILE = "searchFile";
+	private static final String PREV = "prev";
+	private static final String NEXT = "next";
+	private static final String SEARCH = "search";
+	private static final String DOWNLOAD = "download";
+	private static final String SEARCH_FILE = "searchFile";
 
 	// GUI components:
 	private JComboBox<String> appCombo;
@@ -86,11 +80,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
     
 	public static void main(String[] args) {
 		// Schedule for the event-dispatching thread:
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new LogBrowserWindow().setVisible(true);
-			}
-		});
+		javax.swing.SwingUtilities.invokeLater(() -> new LogBrowserWindow().setVisible(true));
 	}
 	
     public LogBrowserWindow() {
@@ -108,22 +98,30 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setOpaque(true);
         this.setContentPane(mainPanel);
-	
-        mainPanel = new JPanel(new BorderLayout());
-        this.add(mainPanel);
 
+        mainPanel.add(createControlComponent(), BorderLayout.NORTH);
+        mainPanel.add(createResultsComponent(), BorderLayout.CENTER);
+        mainPanel.add(createMessagesComponent(), BorderLayout.SOUTH);
+
+        loadConfiguration();
+        
+        this.setVisible(true);
+		textToSearch.requestFocus();
+        metrics = this.getGraphics().getFontMetrics();
+	}
+
+	private JComponent createControlComponent() {
 		// TOP: CONTROL PANEL
 		// --------------------------------------------------------------
-		
+
 		JPanel controlPanel = new JPanel(new GridLayout(2, 1));
 		controlPanel.setBorder(BorderFactory.createRaisedBevelBorder());
-		mainPanel.add(controlPanel, BorderLayout.NORTH);
 
 		// ---- First row --------
-		
+
 		JPanel controlPanelFirstRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
 		controlPanel.add(controlPanelFirstRow);
-		
+
 		// APPs combo:
 		controlPanelFirstRow.add(new JLabel("Logs App: "));
 		appCombo = new JComboBox<>(new String[] { "Loading..." });
@@ -134,7 +132,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 		controlPanelFirstRow.add(new JLabel("Search text: "));
 		textToSearch = new JTextField("", 30);
 		controlPanelFirstRow.add(textToSearch);
-		
+
 		// Dates:
 		fromDateModel = new UtilDateModel();
 		toDateModel = new UtilDateModel();
@@ -148,7 +146,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 		toDateModel.addChangeListener(this);
 
 		// ---- Second row --------
-		
+
 		JPanel controlPanelSecondRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
 		controlPanel.add(controlPanelSecondRow);
 
@@ -157,12 +155,12 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 		searchButton.setActionCommand(SEARCH);
 		searchButton.addActionListener(this);
 		controlPanelSecondRow.add(searchButton);
-		
+
 		downloadButton = new JButton("Download");
 		downloadButton.setActionCommand(DOWNLOAD);
 		downloadButton.addActionListener(this);
 		controlPanelSecondRow.add(downloadButton);
-		
+
 		searchFilesButton = new JButton("Search File");
 		searchFilesButton.setActionCommand(SEARCH_FILE);
 		searchFilesButton.addActionListener(this);
@@ -172,45 +170,52 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 		prevButton.setActionCommand(PREV);
 		prevButton.addActionListener(this);
 		controlPanelSecondRow.add(prevButton);
-		
+
 		nextButton = new JButton(">");
 		nextButton.setActionCommand(NEXT);
 		nextButton.addActionListener(this);
 		controlPanelSecondRow.add(nextButton);
-		
+
 		this.getRootPane().setDefaultButton(searchButton);
 
-		// CENTER: TABBED PANEL FOR THE RESULTS & OPENED FILES
-		// -----------------------------------------------------------------
-		
-		tabsPanel = new JTabbedPane();
-		mainPanel.add(tabsPanel, BorderLayout.CENTER);
+		return controlPanel;
+	}
 
-		// Results table:
-		resultsTable = new ResultsTable(this);
-		resultsTable.addMouseListener(this);
+    private JComponent createResultsComponent() {
+        // CENTER: TABBED PANEL FOR THE RESULTS & OPENED FILES
+        // -----------------------------------------------------------------
 
-		JPanel resultsTablePanel = new JPanel(new GridLayout(1,0));
-		resultsTablePanel.add(resultsTable);
+        tabsPanel = new JTabbedPane();
+
+        // Results table:
+        resultsTable = new ResultsTable(this);
+        resultsTable.addMouseListener(this);
+
+        JPanel resultsTablePanel = new JPanel(new GridLayout(1,0));
+        resultsTablePanel.add(resultsTable);
 
         JScrollPane resultsScroll = new JScrollPane(resultsTablePanel);
         resultsScroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INCREMENT);
         tabsPanel.add("Search results", resultsScroll);
 
+        return tabsPanel;
+    }
+
+	private JComponent createMessagesComponent() {
 		// MESSAGES PANEL
 		// -----------------------------------------------------------------
 
-        StyleContext sc = new StyleContext();
-        normalStyle = sc.addStyle("Normal", null);
-        normalStyle.addAttribute(StyleConstants.Foreground, Color.black);        
-        errorStyle = sc.addStyle("Error", null);
-        errorStyle.addAttribute(StyleConstants.Foreground, Color.red);        
+		StyleContext sc = new StyleContext();
+		normalStyle = sc.addStyle("Normal", null);
+		normalStyle.addAttribute(StyleConstants.Foreground, Color.black);
+		errorStyle = sc.addStyle("Error", null);
+		errorStyle.addAttribute(StyleConstants.Foreground, Color.red);
 
-        messages = new DefaultStyledDocument(sc);
-        JTextPane messagesTextPane = new JTextPane(messages);
-        messagesTextPane.setEditable(false);
-        
-    	JPanel messagesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		messages = new DefaultStyledDocument(sc);
+		JTextPane messagesTextPane = new JTextPane(messages);
+		messagesTextPane.setEditable(false);
+
+		JPanel messagesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		messagesPanel.setBackground(Color.white);
 		messagesPanel.add(messagesTextPane);
 
@@ -218,18 +223,11 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 		msgScroll.setPreferredSize(new Dimension(0, MESSAGES_HEIGHT));
 		msgScroll.setMaximumSize(new Dimension(0, MESSAGES_HEIGHT));
 		msgScroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INCREMENT);
-		mainPanel.add(msgScroll, BorderLayout.SOUTH);
-		 
-		// ------------------------------------------------------------------
 
-        loadConfiguration();
-        
-        this.setVisible(true);
-		textToSearch.requestFocus();
-        metrics = this.getGraphics().getFontMetrics();
+		return msgScroll;
 	}
-	
-	/**
+
+    /**
 	 * Load the application.
 	 */
 	private void loadConfiguration() {
@@ -239,7 +237,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 			// Load the apps names in the combo:
 			List<String> names = logBrowser.getAppNames();
 			appCombo.removeAllItems();
-			appCombo.setModel(new DefaultComboBoxModel<String>(names.toArray(new String[0])));
+			appCombo.setModel(new DefaultComboBoxModel<>(names.toArray(new String[0])));
 			
 			showMessage("Configuration loaded from " + LogBrowser.CONFIG_FILE);
 			
@@ -258,7 +256,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 			long t1 = System.currentTimeMillis();
 			actionStarted();
 
-			String appName = appCombo.getSelectedItem().toString();
+			String appName = Objects.requireNonNull(appCombo.getSelectedItem()).toString();
 			String text = textToSearch.getText();
 			Date fromDate = fromDateModel.getValue();
 			Date toDate = toDateModel.getValue();
@@ -491,7 +489,7 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 			int pos = messages.getLength();
 			messages.insertString(pos, "\n" + newMessage + "\n", null);
 			messages.setParagraphAttributes(pos, pos + newMessage.length(), normalStyle, false);
-			
+			logger.info(newMessage);
 		} catch (BadLocationException e) { e.printStackTrace(); }
 	}
 	
@@ -500,15 +498,15 @@ public class LogBrowserWindow extends JFrame implements ActionListener, ChangeLi
 			int pos = messages.getLength();
 			messages.insertString(pos, "\n" + newMessage + "\n", null);
 			messages.setParagraphAttributes(pos, pos + newMessage.length(), errorStyle, false);
-			
+			logger.error(newMessage);
 		} catch (BadLocationException e) { e.printStackTrace(); }
 	}
 	
 	// ActionListener implementation ------------------------------------------
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		switch (e.getActionCommand()) {
+	public void actionPerformed(ActionEvent actionEvent) {
+		switch (actionEvent.getActionCommand()) {
 		case PREV:
 			previous();
 			break;

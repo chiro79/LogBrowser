@@ -47,7 +47,7 @@ public class LogFile {
 
 		List<LogLine> foundLines = new ArrayList<>();
 		for (LogLine logLine : logLines) {
-			if (logLine.getText().indexOf(text) != -1) {
+			if (logLine.getText().contains(text)) {
 				foundLines.add(logLine);
 			}
 		}

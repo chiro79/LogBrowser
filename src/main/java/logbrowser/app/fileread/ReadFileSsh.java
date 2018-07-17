@@ -95,26 +95,20 @@ public class ReadFileSsh implements ReadFile {
 		List<LogLine> logLines = new ArrayList<>();
 		try {
 			connect();
-			InputStream is = sftpChannel.get(path);
 			String line;
-			try {
-				if (is != null) {                            
+			try (InputStream is = sftpChannel.get(path)) {
+				if (is != null) {
 					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-	                for (int i = 0; (line = reader.readLine()) != null; i++) {    
-	                	logLines.add(new LogLine(i, line));
-	                }                
-	            }
+					for (int i = 0; (line = reader.readLine()) != null; i++) {
+						logLines.add(new LogLine(i, line));
+					}
+				}
 				return logLines;
 
 			} finally {
-				if (is != null) {                            
-					is.close();
-				}
 				disconnect();
-	        }
-		} catch(JSchException e) {
-			throw new IOException(e.getMessage());
-		} catch(SftpException e) {
+			}
+		} catch(JSchException | SftpException e) {
 			throw new IOException(e.getMessage());
 		}
 	}
